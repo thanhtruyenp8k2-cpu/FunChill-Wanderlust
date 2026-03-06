@@ -1,8 +1,8 @@
 .section .text, "ax", @progbits
     .balign 64
-    .global raw_print
-    .type raw_print, %function
-raw_print:
+    .global print_string
+    .type print_string, %function
+print_string:
     mov x1, x0
 loop:
     ldrb w9, [x0], #1
@@ -13,4 +13,4 @@ loop:
     mov x8, #64
     svc #0
     ret
-    .size raw_print, .-raw_print
+    .size print_string, .-print_string
