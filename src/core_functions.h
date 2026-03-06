@@ -4,7 +4,7 @@
 #include <string>
 #include <limits>
 #include <fstream>
-#include "Manager.h"
+#include "manager.h"
 
 inline void clearConsole() {
     #ifdef _WIN32
@@ -283,4 +283,5 @@ inline void monsterMenu(Player &player, bool* inspectLargeShips) {
 		}
 	}
 }
+
 #endif
