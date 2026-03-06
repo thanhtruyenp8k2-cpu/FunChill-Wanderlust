@@ -49,4 +49,5 @@ class Player : public Entity
 		/* Increment method */
 		void increaseMoney(int value) { money += value; if (money > 999999999) { money = 999999999; }}
 };
+
 #endif
