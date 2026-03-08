@@ -50,9 +50,9 @@ loopMain:
 handle_format:
     ldrb w9, [x19], #1
     subs wzr, w9, #'s'
-    beq if_s
+    beq string
     subs wzr, w9, #'d'
-    beq if_d
+    beq decimal
     movz x0, #1
     adrp x1, exp
     add x1, x1, #:lo12:exp
@@ -60,7 +60,7 @@ handle_format:
     movz x8, #64
     svc #0
     b loopMain
-if_s:
+string:
     subs xzr, x20, x29
     beq exception_0
     ldr x0, [x20], #8
@@ -68,8 +68,8 @@ if_s:
     b loopMain
 exception_0:
     add x20, x20, #8
-    b if_s
-if_d:
+    b string
+decimal:
     subs xzr, x20, x29
     beq exception_1
     ldr x0, [x20], #8
@@ -77,7 +77,7 @@ if_d:
     b loopMain
 exception_1:
     add x20, x20, #8
-    b if_d
+    b decimal
 endFunc:
     ldp x29, x30, [sp], #16
     ldp x19, x20, [sp], #144
