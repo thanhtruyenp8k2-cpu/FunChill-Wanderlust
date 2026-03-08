@@ -163,4 +163,18 @@ end_of_decimal_label_without_sign:
     ldp x29, x30, [sp], #48
     ret
     .size unsigned_decimal_utility, .-unsigned_decimal_utility
+.section .note.GNU-stack, "x", @progbits
+.section .note.ABI-tag, "a", @note
+    .balign 4
+    .long 4, 16, 1
+    .asciz "GNU"
+    .long 0, 3, 7, 0
+.ident "GCC: (GNU) 15.2.1 20260103"
+.ident "GCC: (crosstool-NG 1.28.0.3_a3fef85) 15.2.1 20260103"
+.section .note.gnu.build-id,"a",@note
+    .balign 4
+    .long 4, 20, 3
+    .asciz "GNU"
+    .byte 0x39, 0xe7, 0x8f, 0x79, 0xa9, 0xc1, 0xe1, 0x10, 0x50, 0x16
+    .byte 0xe4, 0x1a, 0x60, 0x57, 0x2f, 0x42, 0x73, 0x9d, 0xdc, 0x63
 #endif
