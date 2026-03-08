@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
 /**
  * @file arm64-output.S
  * @brief ARM64 Variadic Print Implementation using raw Linux Syscalls.
@@ -32,6 +33,12 @@
  */
 #ifndef ARM64__OUTPUT__S
 #define ARM64__OUTPUT__S
+#ifndef __ANDROID__
+# error
+#endif
+#ifndef __aarch64__
+# error
+#endif
 .section .bss, "aw", @nobits
     .balign 64
     .type buffer, %object
