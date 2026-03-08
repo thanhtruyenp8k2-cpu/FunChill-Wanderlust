@@ -21,11 +21,11 @@ exp:
 .section .text, "ax", @progbits
     .balign 64
     .global arm64_print
-    .global plugin_string
-    .global plugin_u64
+    .global string_plugin
+    .global unsigned_decimal_utility
     .type arm64_print, %function
-    .type plugin_string, %function
-    .type plugin_u64, %function
+    .type string_plugin, %function
+    .type unsigned_decimal_utility, %function
 arm64_print:
     stp x29, x30, [sp, #-160]!
     stp x19, x20, [sp, #16]
@@ -64,7 +64,7 @@ string:
     subs xzr, x20, x29
     beq exception_0
     ldr x0, [x20], #8
-    bl plugin_string
+    bl string_plugin
     b loopMain
 exception_0:
     add x20, x20, #8
@@ -73,7 +73,7 @@ decimal:
     subs xzr, x20, x29
     beq exception_1
     ldr x0, [x20], #8
-    bl plugin_u64
+    bl unsigned_decimal_utility
     b loopMain
 exception_1:
     add x20, x20, #8
@@ -84,7 +84,7 @@ endFunc:
     ret
     .size arm64_print, .-arm64_print
 
-plugin_string:
+string_plugin:
     stp x29, x30, [sp, #-16]!
     mov x1, x0
 loop:
@@ -97,9 +97,9 @@ loop:
     svc #0
     ldp x29, x30, [sp], #16
     ret
-    .size plugin_string, .-plugin_string
+    .size string_plugin, .-string_plugin
 
-plugin_u64:
+unsigned_decimal_utility:
     stp x29, x30, [sp, #-48]!
     stp x19, x20, [sp, #16]
     stp x21, x22, [sp, #32]
@@ -131,4 +131,4 @@ u64_done:
     ldp x19, x20, [sp, #16]
     ldp x29, x30, [sp], #48
     ret
-    .size plugin_u64, .-plugin_u64
+    .size unsigned_decimal_utility, .-unsigned_decimal_utility
