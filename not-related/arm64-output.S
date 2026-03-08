@@ -3,34 +3,37 @@
  * Function: arm64_print
  * Description: Low-level formatted output for ARM64 using raw syscalls.
  */
+
 .section .bss, "aw", @nobits
     .balign 64
     .type buffer, %object
 buffer:
     .skip 24
     .size buffer, .-buffer
+
 .section .data, "aw", @progbits
     .balign 64
     .type exp, %object
 exp:
     .ascii "%"
     .size exp, .-exp
+
 .section .text, "ax", @progbits
     .balign 64
-    .global arm64_printFMT
+    .global arm64_print
     .global plugin_string
     .global plugin_u64
-    .type arm64_printFMT, %function
+    .type arm64_print, %function
     .type plugin_string, %function
     .type plugin_u64, %function
-arm64_printFMT:
+arm64_print:
     stp x29, x30, [sp, #-160]!
     stp x19, x20, [sp, #16]
     stp x1, x2, [sp, #32]
     stp x3, x4, [sp, #48]
     stp x5, x6, [sp, #64]
     str x7, [sp, #80]
-    mov x29, sp
+    add x29, sp, #88
     mov x19, x0
     add x20, sp, #32
 loopMain:
@@ -58,18 +61,28 @@ handle_format:
     svc #0
     b loopMain
 if_s:
+    subs xzr, x20, x29
+    beq exception_0
     ldr x0, [x20], #8
     bl plugin_string
     b loopMain
+exception_0:
+    add x20, x20, #8
+    b if_s
 if_d:
+    subs xzr, x20, x29
+    beq exception_1
     ldr x0, [x20], #8
     bl plugin_u64
     b loopMain
+exception_1:
+    add x20, x20, #8
+    b if_d
 endFunc:
     ldp x29, x30, [sp], #16
     ldp x19, x20, [sp], #144
     ret
-    .size arm64_printFMT, .-arm64_printFMT
+    .size arm64_print, .-arm64_print
 
 plugin_string:
     stp x29, x30, [sp, #-16]!
