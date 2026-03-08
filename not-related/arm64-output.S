@@ -40,14 +40,14 @@ loopMain:
     ldrb w9, [x19], #1
     cbz w9, endFunc
     subs wzr, w9, #'%'
-    beq handle_format
+    beq format_handling
     movz x0, #1
     sub x1, x19, #1
     movz x2, #1
     movz x8, #64
     svc #0
     b loopMain
-handle_format:
+format_handling:
     ldrb w9, [x19], #1
     subs wzr, w9, #'s'
     beq string
