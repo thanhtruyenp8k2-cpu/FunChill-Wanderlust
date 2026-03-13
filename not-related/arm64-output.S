@@ -42,23 +42,31 @@
 .section .bss, "aw", @nobits
     .balign 64
     .type buffer, %object
+    .type buffer_1, %object
 buffer:
     .skip 24
     .size buffer, .-buffer
+buffer_1:
+    .skip 24
+    .size buffer_1, .-buffer_1
 .section .data, "aw", @progbits
-    .balign 64
     .type percent_format, %object
+    .type hyphen_minus, %object
 percent_format:
-    .ascii "%"
+    .ascii "@"
     .size percent_format, .-percent_format
+hyphen_minus:
+    .byte 0x2d
+    .size hyphen_minus, .-hyphen_minus
 .section .text, "ax", @progbits
-    .balign 64
     .global arm64_print
     .global string_plugin
     .global unsigned_decimal_utility
+    .global signed_decimal_utility_64bit
     .type arm64_print, %function
     .type string_plugin, %function
     .type unsigned_decimal_utility, %function
+    .type signed_decimal_utility_64bit, %function
 arm64_print:
     stp x29, x30, [sp, #-96]!
     stp x19, x20, [sp, #16]
@@ -72,7 +80,7 @@ arm64_print:
 format_string_processing:
     ldrb w9, [x19], #1
     cbz w9, end_output
-    subs wzr, w9, #'%'
+    subs wzr, w9, #'@'
     beq format_handling
     movz x0, #1
     sub x1, x19, #1
@@ -84,14 +92,26 @@ format_handling:
     ldrb w9, [x19], #1
     subs wzr, w9, #'s'
     beq string
-    subs wzr, w9, #'d'
-    beq decimal
+    subs wzr, w9, #'u'
+    beq long_long_decimal
+    subs wzr, w9, #'l'
+    beq next_ll
     movz x0, #1
     adrp x1, percent_format
     add x1, x1, #:lo12:percent_format
     movz x2, #1
     movz x8, #64
     svc #0
+    b format_string_processing
+next_ll:
+    ldrb w9, [x19], #1
+    subs wzr, w9, #'l'
+    bne format_string_processing
+    ldrb w9, [x19], #1
+    subs wzr, w9, #'d'
+    beq long_long_decimal
+    subs wzr, w9, #'u'
+    beq decimal
     b format_string_processing
 string:
     subs xzr, x20, x29
@@ -111,6 +131,15 @@ decimal:
 exception_1:
     add x20, x20, #8
     b decimal
+long_long_decimal:
+    subs xzr, x20, x29
+    beq exception_2
+    ldr x0, [x20], #8
+    bl signed_decimal_utility_64bit
+    b format_string_processing
+exception_2:
+    add x20, x20, #8
+    b long_long_decimal
 end_output:
     ldp x29, x30, [sp], #16
     ldp x19, x20, [sp], #80
@@ -163,7 +192,49 @@ end_of_decimal_label_without_sign:
     ldp x29, x30, [sp], #48
     ret
     .size unsigned_decimal_utility, .-unsigned_decimal_utility
-.section .note.GNU-stack, "x", @progbits
+signed_decimal_utility_64bit:
+    stp x29, x30, [sp, #-32]!
+    stp x19, x20, [sp, #16]
+    adrp x1, buffer_1
+    add x1, x1, #:lo12:buffer_1
+    add x1, x1, #23
+    adrp x20, hyphen_minus
+    add x20, x20, #:lo12:hyphen_minus
+    prfm pstl1keep, [x1]
+    prfm pldl1keep, [x20]
+    mov x19, x0
+    movz x9, #0x8000, lsl 48
+    movz x10, #0x0a
+    mov x2, xzr
+    tst x9, x0
+    beq processing_signed_numbers
+    neg x0, x0
+processing_signed_numbers:
+    udiv x11, x0, x10
+    msub x12, x11, x10, x0
+    mov x0, x11
+    add x2, x2, #0x01
+    add w13, w12, #0x30
+    strb w13, [x1]
+    cbz x0, print_negative_numbers
+    sub x1, x1, #0x01
+    b processing_signed_numbers
+print_negative_numbers:
+    tst x9, x19
+    beq print_positive_numbers
+    sub x1, x1, #0x01
+    add x2, x2, #0x01
+    ldrb w13, [x20]
+    strb w13, [x1]
+print_positive_numbers:
+    movz x0, #0x01
+    movz x8, #0x40
+    svc #0x00
+    ldp x29, x30, [sp], #16
+    ldp x19, x20, [sp], #16
+    ret
+    .size signed_decimal_utility_64bit, .-signed_decimal_utility_64bit
+.section .note.GNU-stack, "", @progbits
 .section .note.ABI-tag, "a", @note
     .balign 4
     .long 4, 16, 1
