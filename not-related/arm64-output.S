@@ -39,34 +39,44 @@
 #ifndef __aarch64__
 # error Architecture not supported
 #endif
-.section .bss, "aw", @nobits
+.section .bss,"aw",@nobits
     .balign 64
+    .type hexadecimal_buffer64bit, %object
     .type buffer, %object
     .type buffer_1, %object
+hexadecimal_buffer64bit:
+    .skip 16
+    .size hexadecimal_buffer64bit, .-hexadecimal_buffer64bit
 buffer:
     .skip 24
     .size buffer, .-buffer
 buffer_1:
     .skip 24
     .size buffer_1, .-buffer_1
-.section .data, "aw", @progbits
+.section .data,"aw",@progbits
     .type percent_format, %object
     .type hyphen_minus, %object
+    .type hexadecimal_character_table, %object
 percent_format:
     .ascii "@"
     .size percent_format, .-percent_format
 hyphen_minus:
     .byte 0x2d
     .size hyphen_minus, .-hyphen_minus
-.section .text, "ax", @progbits
+hexadecimal_character_table:
+    .ascii "0123456789abcdef"
+    .size hexadecimal_character_table, .-hexadecimal_character_table
+.section .text,"ax",@progbits
     .global arm64_print
     .global string_plugin
     .global unsigned_decimal_utility
     .global signed_decimal_utility_64bit
+    .global hexadecimal_addition
     .type arm64_print, %function
     .type string_plugin, %function
     .type unsigned_decimal_utility, %function
     .type signed_decimal_utility_64bit, %function
+    .type hexadecimal_addition, %function
 arm64_print:
     stp x29, x30, [sp, #-96]!
     stp x19, x20, [sp, #16]
@@ -112,6 +122,8 @@ next_ll:
     beq long_long_decimal
     subs wzr, w9, #'u'
     beq decimal
+    subs wzr, w9, #'x'
+    beq hexadecimal
     b format_string_processing
 string:
     subs xzr, x20, x29
@@ -140,6 +152,15 @@ long_long_decimal:
 exception_2:
     add x20, x20, #8
     b long_long_decimal
+hexadecimal:
+    subs xzr, x20, x29
+    beq exception_3
+    ldr x0, [x20], #8
+    bl hexadecimal_addition
+    b format_string_processing
+exception_3:
+    add x20, x20, #8
+    b hexadecimal
 end_output:
     ldp x29, x30, [sp], #16
     ldp x19, x20, [sp], #80
@@ -234,8 +255,40 @@ print_positive_numbers:
     ldp x19, x20, [sp], #16
     ret
     .size signed_decimal_utility_64bit, .-signed_decimal_utility_64bit
-.section .note.GNU-stack, "", @progbits
-.section .note.ABI-tag, "a", @note
+hexadecimal_addition:
+    stp x29, x30, [sp, #-0x20]!
+    stp x19, x20, [sp, #0x10]
+    adrp x1, hexadecimal_buffer64bit
+    add x1, x1, #:lo12:hexadecimal_buffer64bit
+    add x1, x1, #15
+    adrp x20, hexadecimal_character_table
+    add x20, x20, #:lo12:hexadecimal_character_table
+    prfm pstl1keep, [x1]
+    prfm pldl1keep, [x20]
+    mov x19, x0
+    mov x2, xzr
+    mov x9, xzr
+    mvn x9, x9
+    lsl x9, x9, #0x04
+hexadecimal_processing:
+    bic x10, x19, x9
+    ldrb w11, [x20, x10]
+    strb w11, [x1]
+    add x2, x2, #0x01
+    lsr x19, x19, #0x04
+    cbz x19, print_hexadecimal_numbers
+    sub x1, x1, #0x01
+    b hexadecimal_processing
+print_hexadecimal_numbers:
+    movz x0, #0x01
+    movz x8, #0x40
+    svc #0x00
+    ldp x29, x30, [sp], #0x10
+    ldp x19, x20, [sp], #0x10
+    ret
+    .size hexadecimal_addition, .-hexadecimal_addition
+.section .note.GNU-stack,"",@progbits
+.section .note.ABI-tag,"a",@note
     .balign 4
     .long 4, 16, 1
     .asciz "GNU"
