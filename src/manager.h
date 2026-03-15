@@ -18,16 +18,16 @@ class Entity
 		int returnsPrice() const { return price; }
 		/* Setup method */
 		void setName(const std::string _name) { name = _name; }
-		void healthSetting(int _health) { health = _health; if (health > 9999) { health = 9999; }}
-		void setDamage(int _damage) { damage = _damage; if (damage > 9999) { damage = 9999; }}
+		void healthSetting(int _health) { health = _health; if (health > 999999999) { health = 999999999; }}
+		void setDamage(int _damage) { damage = _damage; if (damage > 999999999) { damage = 999999999; }}
 		void priceSetting(int _price) { price = _price; }
 		/* Reduction method */
 		void reducedHealth(int value) { health -= value; if (health < 0) { health = 0; }}
 		void reductionDamage(int value) { damage -= value; if (damage < 7) { damage = 7; }}
 		void reduceCost(int value) { price -= value; }
 		/* Increment method */
-		void increaseHealth(int value) { health += value; if (health > 9999) { health = 9999; }}
-		void increasedDamage(int value) { damage += value; if (damage > 9999) { damage = 9999; }}
+		void increaseHealth(int value) { health += value; if (health > 999999999) { health = 999999999; }}
+		void increasedDamage(int value) { damage += value; if (damage > 999999999) { damage = 999999999; }}
 		void priceIncrease(int value) { price += value; }
 };
 class Player : public Entity
@@ -43,11 +43,10 @@ class Player : public Entity
 		int returnToMaximumHealth() const { return maximumHealth; }
 		/* Setup method */
 		void moneySetting(int value) { money = value; if (money > 999999999) { money = 999999999; }}
-		void settingMaximumHealth( int value) { maximumHealth = value; if (maximumHealth > 9999) { maximumHealth = 9999; }}
+		void settingMaximumHealth( int value) { maximumHealth = value; if (maximumHealth > 999999999) { maximumHealth = 999999999; }}
 		/* Reduction method */
 		void reduceMoney(int value) { money -= value; if (money < 0) { money = 0; }}
 		/* Increment method */
 		void increaseMoney(int value) { money += value; if (money > 999999999) { money = 999999999; }}
 };
-
 #endif
