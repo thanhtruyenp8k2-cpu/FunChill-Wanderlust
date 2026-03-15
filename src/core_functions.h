@@ -4,6 +4,8 @@
 #include <string>
 #include <limits>
 #include <fstream>
+#include <thread>
+#include <chrono>
 #include "manager.h"
 
 inline void clearConsole() {
@@ -74,6 +76,7 @@ inline void healthUpgrade(Player &player) {
 		std::cout << "Enter a number or letter to select: ";
 		std::cin >> select;
 		if (select == "Y" || select == "y") {
+			if (player.returnToMaximumHealth() >= 999999999) { std::cout << "Your health is already at MAX LEVEL (999999999)!" << std::endl; continue; }
 			if (player.returnsMoney() >= HEALTH_UPGRADE_PRICES) {
 				player.settingMaximumHealth(player.returnToMaximumHealth() + HEALTH_IMPROVEMENT_INDEX);
 				player.healthSetting(player.returnToMaximumHealth());
@@ -196,26 +199,36 @@ inline void combatLogic(Player &player, Entity &entity) {
 inline void monsterMenu(Player &player, bool* inspectLargeShips) {
 	while (true) {
 		std::string select;
-        std::cout << "E: Exit current menu\n";
-        std::cout << "1: Husk\n";
-        std::cout << "2: Creeper\n";
-        std::cout << "3: Charged Creeper\n";
-        std::cout << "4: Rush\n";
-        std::cout << "5: Ambush\n";
-        std::cout << "6: Bus\n";
-        std::cout << "7: The Painter\n";
-        std::cout << "8: Siren Head\n";
-        std::cout << "9: Cartoon Cat\n";
-        std::cout << "10: Superman\n";
-        std::cout << "11: Saltwater Crocodile\n";
-        std::cout << "12: Carcharodon Carcharias\n";
-        std::cout << "13: Large Ship\n";
-        std::cout << "14: TON 618\n";
+		std::cout << "\n========== MONSTER BOUNTY BOARD ==========\n";
+        std::cout << "P: Player Info | E: Exit Menu\n";
+        std::cout << "------------------------------------------\n";
+        std::cout << "1.  Husk                  (HP: 50   | DMG: 5)\n";
+        std::cout << "2.  Creeper               (HP: 75   | DMG: 7)\n";
+        std::cout << "3.  Charged Creeper       (HP: 100  | DMG: 10)\n";
+        std::cout << "4.  Rush                  (HP: 125  | DMG: 15)\n";
+        std::cout << "5.  Ambush                (HP: 150  | DMG: 15)\n";
+        std::cout << "6.  Bus                   (HP: 520  | DMG: 520)\n";
+        std::cout << "7.  The Painter           (HP: 0    | DMG: 0)\n";
+        std::cout << "8.  Siren Head            (HP: 175  | DMG: 16)\n";
+        std::cout << "9.  Cartoon Cat           (HP: 250  | DMG: 25)\n";
+        std::cout << "10. Superman              (HP: 500  | DMG: 50)\n";
+        std::cout << "11. Saltwater Crocodile   (HP: 1000 | DMG: 125)\n";
+        std::cout << "12. Carcharodon Carcharias(HP: 1500 | DMG: 250)\n";
+        std::cout << "13. [BOSS] Large Ship     (HP: 2500 | DMG: 520)\n";
+        std::cout << "14. [GOD] TON 618         (HP: 16000| DMG: 1600)\n";
+        std::cout << "------------------------------------------\n";
         std::cout << "Enter a number or letter to select: ";
         std::cin >> select;
         if (select == "E" || select == "e") {
         	break;
         }
+        else if (select == "P" || select == "p") {
+			playerInformation(player);
+			std::cout << "Press Enter to continue..." << std::endl;
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			std::cin.get();
+			continue;
+		}
         else if (select == "1") {
         	Entity husk("Husk", 50, 5, 5);
             combatLogic(player, husk);
@@ -241,7 +254,7 @@ inline void monsterMenu(Player &player, bool* inspectLargeShips) {
             combatLogic(player, bus);
         }
         else if (select == "7") {
-            Entity thePainter("The Painter", 0, 0, 2);
+            Entity thePainter("The Painter", 7, 0, 7);
             combatLogic(player, thePainter);
         }
         else if (select == "8") {
@@ -267,12 +280,25 @@ inline void monsterMenu(Player &player, bool* inspectLargeShips) {
 		else if (select == "13") {
 			Entity largeShip("Large Ship", 2500, 520, 16);
 			combatLogic(player, largeShip);
-			if ((*inspectLargeShips) == true) {
-				std::cout << "It's surprising you were able to destroy the Large Ship. I'll give you 1600 permanent damage to fight those terrifying monsters later." << std::endl;
-				player.increasedDamage(1600);
-				(*inspectLargeShips) = false;
+			if (largeShip.returnsHealth() <= 0) {
+				if ((*inspectLargeShips) == true) {
+					std::cout << "\n==========================================" << std::endl;
+					std::cout << "CRITICAL VICTORY!" << std::endl;
+					std::cout << "It's surprising you were able to destroy the Large Ship." << std::endl;
+					std::cout << "You have scavenged advanced weaponry from the wreckage." << std::endl;
+					std::cout << "Gained: +1600 Permanent Damage buff!" << std::endl;
+					std::cout << "==========================================" << std::endl;
+					
+					player.increasedDamage(1600);
+					(*inspectLargeShips) = false;
+				}
+				else { 
+					std::cout << "\nThe wreckage is empty. You've already looted this ship, haha." << std::endl; 
+				}
 			}
-			else { std::cout << "You've already taken damage, so you won't get any more, haha.\n"; }
+			else {
+				std::cout << "\nThe enemy ship retreated! No spoils for cowards." << std::endl;
+			}
 		}
 		else if (select == "14") {
 			Entity ton618("TON 618", 16000, 1600, 700);
@@ -284,4 +310,75 @@ inline void monsterMenu(Player &player, bool* inspectLargeShips) {
 	}
 }
 
+void startGame() {
+	std::string initialName;
+	std::cout << "Welcome to FunGame!!!" << std::endl;
+	std::cout << "[You can type 'clear' to clear the screen in the main lobby]" << std::endl;
+	std::cout << "Please enter your name to start: " << std::endl;
+	std::getline(std::cin, initialName);
+	if (initialName.empty()) {
+		initialName = "Player";
+	}
+	clearConsole();
+    Player steve(initialName, 100, 1, 0, 100);
+    static bool inspectLargeShips = true;
+    while (true) {
+    	if (steve.returnToMaximumHealth() > 999999999 || steve.returnsDamage() > 999999999) {
+    		std::cout << "\n\033[1;31m[!] The system detects code modification and tampering in the game!\033[0m" << std::endl;
+    		std::this_thread::sleep_for(std::chrono::seconds(3));
+    		exit(1);
+    	}
+        std::string select;
+        std::cout << "E: Exit the game!" << std::endl;
+        std::cout << "SG: Save the game" << std::endl;
+        std::cout << "IG: Import games" << std::endl;
+        std::cout << "1: Player VS. Entity" << std::endl;
+        std::cout << "2: Upgrade damage" << std::endl;
+        std::cout << "3: Restore health" << std::endl;
+        std::cout << "4: Your own information" << std::endl;
+        std::cout << "5: Upgrade your health" << std::endl;
+        std::cout << "6: Change your name" << std::endl;
+        std::cout << "Enter a number or letter to select: ";
+        std::cin >> select;
+		if (select == "E" || select == "e" || select == "Exit")
+        {
+            break;
+        }
+        else if (select == "SG" || select == "sg") {
+        	saveGame(steve, inspectLargeShips);
+		}
+        else if (select == "IG" || select == "ig") {
+        	loadGame(steve, inspectLargeShips);
+		}
+        else if (select == "1") {
+        	monsterMenu(steve, &inspectLargeShips);
+        }
+        else if (select == "2") {
+        	damageUpgrade(steve);
+        	
+		}
+		else if (select == "3") {
+			restoreHealth(steve);
+			
+		}
+		else if (select == "clear") {
+			clearConsole();
+		}
+		else if (select == "4") {
+			playerInformation(steve);
+			
+		}
+		else if (select == "5") {
+			healthUpgrade(steve);
+			
+		}
+		else if (select == "6") {
+			changePlayerName(steve);
+			
+		}
+		else {
+			std::cout << "You have entered a number or letter that does not exist in the list. Please re-enter the correct one!\n";
+		}
+    } /* End of game loop */
+}
 #endif
