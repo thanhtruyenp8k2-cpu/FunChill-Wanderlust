@@ -241,12 +241,40 @@ inline void changePlayerName(Player &player) {
 }
 inline int HEALTH_UPGRADE_PRICES = 16;
 inline int HEALTH_IMPROVEMENT_INDEX = 25;
+inline void healthPurchaseOptions(Player* player) {
+	unsigned long long totalHealth;
+	std::cout << "Enter the number of TIMES you want to upgrade: " << std::endl;
+	if(!(std::cin >> totalHealth)) {
+		std::cin.clear();
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		std::cout << "Character input error! You must enter a number (Enter 0 to cancel purchase)" << std::endl;
+		return;
+	}
+	unsigned long long totalHealthPrice = (totalHealth*(2*HEALTH_UPGRADE_PRICES+(totalHealth-1)))/2;
+	unsigned long long overallHealthImprovement = (totalHealth*HEALTH_IMPROVEMENT_INDEX)+(25*totalHealth*(totalHealth-1))/2;
+	if ((*player).returnsMoney() >= (int)totalHealthPrice) {
+		if ((unsigned long long)(*player).returnToMaximumHealth() + overallHealthImprovement >= 999999999) {
+			std::cout << "You've reached your health limit!" << std::endl;
+			return;
+		}
+		(*player).settingMaximumHealth((*player).returnToMaximumHealth() + (int)overallHealthImprovement);
+		(*player).healthSetting((*player).returnToMaximumHealth());
+		(*player).reduceMoney((int)totalHealthPrice);
+		HEALTH_UPGRADE_PRICES += (int)totalHealth;
+		HEALTH_IMPROVEMENT_INDEX += (int)(totalHealth*25);
+		std::cout << "You have successfully improved your health!" << std::endl;
+	}
+	else {
+		std::cout << "You don't have enough money!" << std::endl;
+		return;
+	}
+}
 inline void healthUpgrade(Player &player) {
 	while (true) {
 		std::string select;
 		std::cout << "Do you want to increase your maximum health? This will help you survive longer." << std::endl;
 		std::cout << "Upgrading your health costs " << HEALTH_UPGRADE_PRICES << " coins." << std::endl;
-		std::cout << "Y: Yes, N: No (N = Exit Menu)" << std::endl;
+		std::cout << "Y: Yes, O: Option, N: No (N = Exit Menu)" << std::endl;
 		std::cout << "Enter a number or letter to select: ";
 		std::cin >> select;
 		if (select == "Y" || select == "y") {
@@ -262,6 +290,9 @@ inline void healthUpgrade(Player &player) {
 			else {
 				std::cout << "You don't have enough coins to upgrade your health!" << std::endl;
 			}
+		}
+		else if (select == "O" || select == "o") {
+			healthPurchaseOptions(&player);
 		}
 		else if (select == "N" || select == "n") {
 			break;
@@ -308,12 +339,36 @@ inline void restoreHealth(Player &player) {
 	}
 }
 inline int DAMAGE_UPGRADE_PRICE = 0;
+inline void damagePurchaseOptions(Player* player) {
+	unsigned long long totalDamage = 0;
+		std::cout << "Enter the amount of damage you want to upgrade: " << std::endl;
+		if(!(std::cin >> totalDamage)) {
+			std::cin.clear();
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			std::cout << "Character input error! You must enter a number (Enter 0 to cancel purchase)" << std::endl;
+			return;
+		}
+		unsigned long long priceDamage = (totalDamage*(2*DAMAGE_UPGRADE_PRICE+(totalDamage-1)))/2;
+		if ((*player).returnsMoney() >= priceDamage) {
+			if ((*player).returnsDamage() >= 999999999) {
+				std::cout << "You've reached your damage limit!" << std::endl;
+				return;
+			}
+			(*player).increasedDamage(totalDamage);
+			(*player).reduceMoney(priceDamage);
+			DAMAGE_UPGRADE_PRICE += totalDamage;
+			std::cout << "You have successfully upgraded your damage!" << std::endl;
+		}
+		else {
+			std::cout << "You don't have enough money!" << std::endl;
+		}
+}
 inline void damageUpgrade(Player &player) {
 	while(true) {
 		std::string select;
 		std::cout << "Want to upgrade your damage? This will make you stronger than when you started." << std::endl;
 		std::cout << "The cost to upgrade damage is " << DAMAGE_UPGRADE_PRICE << " coins." << std::endl;
-		std::cout << "Y: Yes, N: No ( No = Exit Menu )" << std::endl;
+		std::cout << "Y: Yes, O: Option, N: No ( No = Exit Menu )" << std::endl;
 		std::cout << "Enter a number or letter to select: ";
 		std::cin >> select;
 		if (select == "Y" || select == "y") {
@@ -329,6 +384,9 @@ inline void damageUpgrade(Player &player) {
 			else {
 				std::cout << "You have entered a number or letter that does not exist in the list. Please re-enter the correct one!" << std::endl;
 			}
+		}
+		else if (select == "O" || select == "o") {
+			damagePurchaseOptions(&player);
 		}
 		else if (select == "N" || select == "n") {
 			break;
