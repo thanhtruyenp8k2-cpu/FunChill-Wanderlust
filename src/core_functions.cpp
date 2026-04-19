@@ -7,18 +7,25 @@ std::map < long long, Entity > getMonsterList() {
     ml[1] = Entity("Husk", 50, 5, 5);
     ml[2] = Entity("Creeper", 75, 7, 10);
     ml[3] = Entity("Charged Creeper", 100, 10, 25);
-    ml[7] = Entity("The Painter", 7, 0, 7);
+    ml[7] = Entity("The Painter", 150, 16, 34);
+    ml[8] = Entity("Blue-Eyes White Dragon", 300, 25, 43);
+    ml[9] = Entity("Exodia the Forbidden One", 170, 16, 36);
+    ml[10] = Entity("SGR 1806-20", 500, 3000, 52);
+    ml[11] = Entity("Mosquito", 1, 1, 1);
+    ml[12] = Entity("Chicxulub", 1000, 1000, 100);
     ml[13] = Entity("Large Ship", 2500, 520, 700);
-    ml[30] = Entity("TON 618", 70000000, 16000, 52000000);
+    ml[14] = Entity("The Solar Flare", 52000000, 16000, 5200000);
+    ml[30] = Entity("TON 618", 70000000, 43000, 7000000);
+    ml[31] = Entity("Stephenson 2-18", 250000, 700000, 6700000);
     return ml;
 }
 std::atomic < bool > isMonitoring(true);
 void antiCheatScanner(Player &player) {
     while (isMonitoring) {
-        if (player.get(MAXIMUM_HEALTH) > 999999999 ||
-            player.get(DAMAGE) > 999999999 ||
-            player.get(MONEY) > 999999999 ||
-            player.get(HEALTH) > 999999999) {
+        if (player.get(MAXIMUM_HEALTH) > 999999999999999 ||
+            player.get(DAMAGE) > 999999999999999 ||
+            player.get(MONEY) > 999999999999999 ||
+            player.get(HEALTH) > 999999999999999) {
 
             std::cout << "\n[!] Security Alert: Memory modification detected!" << std::endl;
             std::cout << "[!] Game will be terminated immediately." << std::endl;
@@ -157,7 +164,7 @@ void changePlayerName(Player &player) {
         std::cout << "Invalid name. Please try again!" << std::endl;
     }
 }
-long long HEALTH_UPGRADE_PRICES = 16;
+long long HEALTH_UPGRADE_PRICES = 100;
 long long HEALTH_IMPROVEMENT_INDEX = 25;
 void healthPurchaseOptions(Player* player) {
     unsigned long long totalHealth;
@@ -171,7 +178,7 @@ void healthPurchaseOptions(Player* player) {
     unsigned long long totalHealthPrice = (totalHealth*(2*HEALTH_UPGRADE_PRICES+(totalHealth-1)))/2;
     unsigned long long overallHealthImprovement = (totalHealth*HEALTH_IMPROVEMENT_INDEX)+(25*totalHealth*(totalHealth-1))/2;
     if ((*player).get(MONEY) >= (long long)totalHealthPrice) {
-        if ((unsigned long long)(*player).get(MAXIMUM_HEALTH) + overallHealthImprovement >= 999999999) {
+        if ((unsigned long long)(*player).get(MAXIMUM_HEALTH) + overallHealthImprovement >= 999999999999999) {
             std::cout << "You've reached your health limit!" << std::endl;
             return;
         }
@@ -196,8 +203,8 @@ void healthUpgrade(Player &player) {
         std::cout << "Enter a number or letter to select: ";
         std::cin >> select;
         if (select == "Y" || select == "y") {
-            if (player.get(MAXIMUM_HEALTH) >= 999999999) {
-                std::cout << "Your health is already at MAX LEVEL (999999999)!" << std::endl; continue;
+            if (player.get(MAXIMUM_HEALTH) >= 999999999999999) {
+                std::cout << "Your health is already at MAX LEVEL (999999999999999)!" << std::endl; continue;
             }
             if (player.get(MONEY) >= HEALTH_UPGRADE_PRICES) {
                 player.set(player.get(MAXIMUM_HEALTH) + HEALTH_IMPROVEMENT_INDEX, MAXIMUM_HEALTH);
@@ -265,7 +272,7 @@ void restoreHealth(Player &player) {
     }
 }
 long long DAMAGE_IMPROVEMENT_INDEX = 1;
-long long DAMAGE_UPGRADE_PRICE = 0;
+long long DAMAGE_UPGRADE_PRICE = 10;
 void damagePurchaseOptions(Player* player) {
     unsigned long long totalDamage = 0;
     std::cout << "Enter the amount of damage you want to upgrade: ";
@@ -278,7 +285,7 @@ void damagePurchaseOptions(Player* player) {
     unsigned long long priceDamage = (totalDamage*(2*DAMAGE_UPGRADE_PRICE+(totalDamage-1)))/2;
     unsigned long long overallDamageGain = (totalDamage * DAMAGE_IMPROVEMENT_INDEX) + (totalDamage * (totalDamage - 1)) / 2;
     if ((*player).get(MONEY) >= (long long)priceDamage) {
-        if ((*player).get(DAMAGE) + (long long)overallDamageGain >= 999999999) {
+        if ((*player).get(DAMAGE) + (long long)overallDamageGain >= 999999999999999) {
             std::cout << "You've reached your damage limit!" << std::endl;
             return;
         }
@@ -415,6 +422,17 @@ void monsterMenu(Player &player, bool* inspectLargeShips) {
                     }
                     else {
                         std::cout << "\nThe enemy ship retreated! No spoils for cowards." << std::endl;
+                    }
+                }
+                else if(id == 10) {
+                    Entity sgr = entities[id];
+                    combatLogic(player, sgr);
+                    if (sgr.get(HEALTH) > 0) {
+                        player.adjust(-777777, HEALTH);
+                        if(player.get(HEALTH) <= 0) {
+                            std::cout << "You were hit by the extremely strong magnetic field of SGR 1806-20 which sucked -777777 of your health! You are dead!" << std::endl;
+                            exit(1);
+                        } else {}
                     }
                 }
                 else {

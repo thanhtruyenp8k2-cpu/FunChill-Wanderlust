@@ -2,8 +2,8 @@
 Entity::Entity(): name("Unk"), health(0), damage(0), price(0) {}
 Entity::Entity(const std::string& _name, long long _health, long long _damage, long long _price): name(_name), health(_health), damage(_damage), price(_price) {}
 void Entity::adjust(long long val, common_attribute_id id) {
-    if (val > 9223372036854775807LL) {
-        val = 9223372036854775807LL;
+    if (val > 999999999999999) {
+        val = 999999999999999;
     }
     if (id > PRICE) {
         return;
@@ -22,7 +22,7 @@ void Entity::adjust(long long val, common_attribute_id id) {
     }
 }
 void Entity::set(long long val, common_attribute_id id) {
-    if (val > 9223372036854775807LL) val = 9223372036854775807;
+    if (val > 999999999999999) val = 999999999999999;
     if (id > PRICE) return;
     if (id == NAME) return;
     else if (id == HEALTH) health = val;
@@ -47,8 +47,8 @@ Entity::~Entity() {}
 Player::Player(): Entity(), money(0), maximum_health(0) {}
 Player::Player(const std::string& _name, long long _health, long long _damage, long long _money): Entity(_name, _health, _damage, 0), money(_money), maximum_health(_health) {}
 void Player::adjust(long long val, common_attribute_id id) {
-    if (val > 9223372036854775807LL) {
-        val = 9223372036854775807LL;
+    if (val > 999999999999999) {
+        val = 999999999999999;
     }
     if (id > MAXIMUM_HEALTH) {
         return;
@@ -67,7 +67,7 @@ void Player::adjust(long long val, common_attribute_id id) {
     }
 }
 void Player::set(long long val, common_attribute_id id) {
-    if (val > 9223372036854775807LL) val = 9223372036854775807LL;
+    if (val > 999999999999999) val = 999999999999999;
     if (id > MAXIMUM_HEALTH) return;
     if (id == NAME) return;
     else if (id == MONEY) money = val;

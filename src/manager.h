@@ -2,6 +2,7 @@
 #define MANAGER_H
 #include <iostream>
 #include <string>
+#include <limits>
 enum common_attribute_id {
     NAME = 0x00,
     HEALTH = 0x01,
